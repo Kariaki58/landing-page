@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Pricing - Choose Your Plan</title>
+    <style>
+        :root {
+            --primary-color: #4a6bff;
+            --secondary-color: #f8f9fa;
+            --text-color: #333;
+            --light-text: #777;
+            --border-color: #e1e1e1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7ff;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: var(--light-text);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .country-selector {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px auto;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .country-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .country-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: var(--secondary-color);
+        }
+
+        .detected-country {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--light-text);
+        }
+
+        .pricing-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .pricing-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            width: 300px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .pricing-card.popular {
+            border: 2px solid var(--primary-color);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: var(--primary-color);
+        }
+
+        .price span {
+            font-size: 1rem;
+            color: var(--light-text);
+            font-weight: normal;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .pricing-features li {
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #3a56d4;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: var(--light-text);
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .pricing-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Choose Your Perfect Plan</h1>
+            <p>Prices are shown in your local currency for your convenience.</p>
+        </header>
+
+        <div class="country-selector">
+            <label for="country">Select your country:</label>
+            <select id="country" onchange="updateCountryInfo()">
+                <option value="">Loading countries...</option>
+            </select>
+            <div id="detected-country" class="detected-country"></div>
+        </div>
+
+        <div id="pricing-loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading pricing information...</p>
+        </div>
+
+        <div id="pricing-container" class="pricing-container" style="display: none;">
+            <!-- Pricing cards will be inserted here by JavaScript -->
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2023 Global Pricing Inc. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // List of countries for the dropdown
+        const countries = [
+            { code: 'US', name: 'United States', currency: 'USD' },
+            { code: 'GB', name: 'United Kingdom', currency: 'GBP' },
+            { code: 'DE', name: 'Germany', currency: 'EUR' },
+            { code: 'FR', name: 'France', currency: 'EUR' },
+            { code: 'IT', name: 'Italy', currency: 'EUR' },
+            { code: 'ES', name: 'Spain', currency: 'EUR' },
+            { code: 'CA', name: 'Canada', currency: 'CAD' },
+            { code: 'AU', name: 'Australia', currency: 'AUD' },
+            { code: 'JP', name: 'Japan', currency: 'JPY' },
+            { code: 'IN', name: 'India', currency: 'INR' },
+            { code: 'BR', name: 'Brazil', currency: 'BRL' },
+            { code: 'MX', name: 'Mexico', currency: 'MXN' },
+            { code: 'ZA', name: 'South Africa', currency: 'ZAR' },
+            { code: 'NG', name: 'Nigeria', currency: 'NGN' },
+            { code: 'KE', name: 'Kenya', currency: 'KES' },
+            { code: 'SG', name: 'Singapore', currency: 'SGD' },
+            { code: 'AE', name: 'United Arab Emirates', currency: 'AED' },
+            { code: 'SA', name: 'Saudi Arabia', currency: 'SAR' }
+        ];
+
+        // USD-based pricing that we'll convert to local currencies
+        const usdPricing = {
+            basic: 9.99,
+            pro: 19.99,
+            enterprise: 49.99
+        };
+
+        // Exchange rates (we'll fetch these from an API)
+        let exchangeRates = {};
+        let userCountry = null;
+        let userCurrency = 'USD';
+
+        // Detect user's country on page load
+        window.onload = function() {
+            // First populate the country dropdown
+            populateCountryDropdown();
+            
+            // Then try to detect the user's country
+            detectUserCountry();
+        };
+
+        function populateCountryDropdown() {
+            const countrySelect = document.getElementById('country');
+            countrySelect.innerHTML = '<option value="">Select your country</option>';
+            
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.textContent = country.name;
+                countrySelect.appendChild(option);
+            });
+        }
+
+        async function detectUserCountry() {
+            const detectedCountryElement = document.getElementById('detected-country');
+            detectedCountryElement.textContent = 'Detecting your country...';
+            
+            try {
+                // Using a free API to detect country based on IP
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                
+                const countryCode = data.country;
+                const countryName = data.country_name;
+                const currency = data.currency || 'USD';
+                
+                userCountry = countryCode;
+                userCurrency = currency;
+                
+                detectedCountryElement.textContent = `We've detected you're from ${countryName}. Showing prices in ${currency}.`;
+                
+                // Set the dropdown to the detected country
+                const countrySelect = document.getElementById('country');
+                countrySelect.value = countryCode;
+                
+                // Fetch exchange rates and show pricing
+                await fetchExchangeRates();
+                showLocalPricing();
+            } catch (error) {
+                console.error('Error detecting country:', error);
+                detectedCountryElement.textContent = 'Unable to detect your country. Please select it manually. Showing prices in USD by default.';
+                
+                // Fallback to USD pricing
+                userCurrency = 'USD';
+                showLocalPricing();
+            }
+        }
+
+        async function updateCountryInfo() {
+            const countrySelect = document.getElementById('country');
+            const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+            
+            if (selectedOption.value) {
+                const detectedCountryElement = document.getElementById('detected-country');
+                const selectedCountry = countries.find(c => c.code === selectedOption.value);
+                
+                userCountry = selectedOption.value;
+                userCurrency = selectedCountry?.currency || 'USD';
+                
+                detectedCountryElement.textContent = `You've selected ${selectedOption.text}. Showing prices in ${userCurrency}.`;
+                
+                // Fetch exchange rates if we haven't already or if switching from USD country
+                if (userCurrency !== 'USD' && !exchangeRates[userCurrency]) {
+                    await fetchExchangeRates();
+                }
+                
+                showLocalPricing();
+            }
+        }
+
+        async function fetchExchangeRates() {
+            document.getElementById('pricing-loading').style.display = 'block';
+            document.getElementById('pricing-container').style.display = 'none';
+            
+            try {
+                // Using a free exchange rate API (you might want to use a more reliable one in production)
+                const response = await fetch(`https://api.exchangerate-api.com/v4/latest/USD`);
+                const data = await response.json();
+                exchangeRates = data.rates;
+                
+                // Ensure USD is always 1 in case the API doesn't include it
+                exchangeRates['USD'] = 1;
+            } catch (error) {
+                console.error('Error fetching exchange rates:', error);
+                // Fallback to USD if API fails
+                exchangeRates = { USD: 1 };
+                document.getElementById('detected-country').textContent += ' (using USD due to exchange rate service error)';
+                userCurrency = 'USD';
+            }
+        }
+
+        function convertToLocalCurrency(usdAmount) {
+            if (userCurrency === 'USD') {
+                return usdAmount;
+            }
+            
+            const rate = exchangeRates[userCurrency];
+            if (!rate) {
+                console.warn(`No exchange rate found for ${userCurrency}, falling back to USD`);
+                return usdAmount;
+            }
+            
+            // Convert and round to 2 decimal places for most currencies
+            let convertedAmount = usdAmount * rate;
+            
+            // Special handling for currencies that typically don't use decimals
+            if (['JPY', 'KRW', 'VND', 'IDR'].includes(userCurrency)) {
+                return Math.round(convertedAmount);
+            }
+            
+            return Math.round(convertedAmount * 100) / 100;
+        }
+
+        function formatCurrency(amount, currency) {
+            // For production, you might want to use Intl.NumberFormat for better formatting
+            if (['JPY', 'KRW', 'VND', 'IDR'].includes(currency)) {
+                return `${currency} ${amount.toLocaleString()}`;
+            }
+            return `${currency} ${amount.toFixed(2)}`;
+        }
+
+        function showLocalPricing() {
+            document.getElementById('pricing-loading').style.display = 'block';
+            document.getElementById('pricing-container').style.display = 'none';
+            
+            // Simulate loading delay
+            setTimeout(() => {
+                renderPricingCards();
+                document.getElementById('pricing-loading').style.display = 'none';
+                document.getElementById('pricing-container').style.display = 'flex';
+            }, 500);
+        }
+
+        function renderPricingCards() {
+            const pricingContainer = document.getElementById('pricing-container');
+            pricingContainer.innerHTML = '';
+            
+            // Convert prices to local currency
+            const basicPrice = convertToLocalCurrency(usdPricing.basic);
+            const proPrice = convertToLocalCurrency(usdPricing.pro);
+            const enterprisePrice = convertToLocalCurrency(usdPricing.enterprise);
+            
+            // Basic Plan
+            pricingContainer.appendChild(createPricingCard(
+                'Basic', 
+                formatCurrency(basicPrice, userCurrency), 
+                'per month', 
+                [
+                    '10 projects',
+                    '5 team members',
+                    'Basic analytics',
+                    'Email support'
+                ],
+                false
+            ));
+            
+            // Pro Plan (popular)
+            pricingContainer.appendChild(createPricingCard(
+                'Pro', 
+                formatCurrency(proPrice, userCurrency), 
+                'per month', 
+                [
+                    'Unlimited projects',
+                    '20 team members',
+                    'Advanced analytics',
+                    'Priority email support',
+                    'API access'
+                ],
+                true
+            ));
+            
+            // Enterprise Plan
+            pricingContainer.appendChild(createPricingCard(
+                'Enterprise', 
+                formatCurrency(enterprisePrice, userCurrency), 
+                'per month', 
+                [
+                    'Unlimited projects',
+                    'Unlimited team members',
+                    'Advanced analytics',
+                    '24/7 phone support',
+                    'API access',
+                    'Dedicated account manager'
+                ],
+                false
+            ));
+        }
+
+        function createPricingCard(title, price, frequency, features, isPopular) {
+            const card = document.createElement('div');
+            card.className = `pricing-card ${isPopular ? 'popular' : ''}`;
+            
+            if (isPopular) {
+                const badge = document.createElement('div');
+                badge.className = 'popular-badge';
+                badge.textContent = 'Most Popular';
+                card.appendChild(badge);
+            }
+            
+            const titleElement = document.createElement('h3');
+            titleElement.textContent = title;
+            card.appendChild(titleElement);
+            
+            const priceElement = document.createElement('div');
+            priceElement.className = 'price';
+            priceElement.innerHTML = `${price} <span>/${frequency}</span>`;
+            card.appendChild(priceElement);
+            
+            const featuresList = document.createElement('ul');
+            featuresList.className = 'pricing-features';
+            
+            features.forEach(feature => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                featuresList.appendChild(li);
+            });
+            
+            card.appendChild(featuresList);
+            
+            const button = document.createElement('button');
+            button.className = `btn ${isPopular ? '' : 'btn-outline'}`;
+            button.textContent = 'Get Started';
+            card.appendChild(button);
+            
+            return card;
+        }
+    </script>
+</body>
+</html>
