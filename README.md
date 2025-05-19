@@ -69,7 +69,7 @@ You can easily customize:
 
 ## Screenshot
 
-![Pricing Page Screenshot](screenshot.png)
+![Image](https://github.com/user-attachments/assets/12f94a7c-71ad-4c3a-a4ae-c251cbd45715)
 
 ## License
 
